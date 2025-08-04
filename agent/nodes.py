@@ -7,7 +7,7 @@ from utils.clinicaltrials import search_trials
 
 def get_llm():
     return ChatGroq(
-        model="llama3-70b-8192",
+        model="llama-3.3-70b-versatile",
         groq_api_key=os.environ.get("GROQ_API_KEY"),
         temperature=0.1,
     )

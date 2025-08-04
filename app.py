@@ -115,7 +115,7 @@ def main():
         
         st.markdown("---")
         st.markdown("### 🛠️ Tech Stack")
-        techs = ["LangGraph", "LangChain", "Groq Llama 3 70B", "ClinicalTrials.gov API", "Streamlit", "Python"]
+        techs = ["LangGraph", "LangChain", "Groq Llama 3.3 70B", "ClinicalTrials.gov API", "Streamlit", "Python"]
         for t in techs:
             st.markdown(f'<span class="tech-badge">{t}</span>', unsafe_allow_html=True)
         
@@ -261,7 +261,7 @@ def main():
     st.markdown("""
     <div style="text-align: center; color: #6c757d; font-size: 0.85em;">
         <p>⚠️ <strong>Disclaimer:</strong> This tool is for informational purposes only. Always consult with healthcare professionals for clinical trial eligibility decisions.</p>
-        <p>Built with LangGraph • LangChain • Groq Llama 3 • ClinicalTrials.gov API</p>
+        <p>Built with LangGraph • LangChain • Groq Llama 3.3 • ClinicalTrials.gov API</p>
     </div>
     """, unsafe_allow_html=True)
 
