@@ -1,14 +1,14 @@
 import json
 import os
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from .state import AgentState, PatientData, TrialMatch
 from .prompts import PARSE_PATIENT_PROMPT, ANALYZE_ELIGIBILITY_PROMPT, GENERATE_REPORT_PROMPT
 from utils.clinicaltrials import search_trials
 
 def get_llm():
-    return ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        google_api_key=os.environ.get("GOOGLE_API_KEY"),
+    return ChatGroq(
+        model="llama3-70b-8192",
+        groq_api_key=os.environ.get("GROQ_API_KEY"),
         temperature=0.1,
     )
 

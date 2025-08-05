@@ -77,11 +77,11 @@ def main():
         st.markdown("### ⚙️ Configuration")
         
         # API Key handling
-        api_key = os.environ.get("GOOGLE_API_KEY", "")
+        api_key = os.environ.get("GROQ_API_KEY", "")
         if not api_key:
-            api_key = st.text_input("Google Gemini API Key", type="password", help="Get a free key at ai.google.dev")
+            api_key = st.text_input("Groq API Key", type="password", help="Get a free key at console.groq.com")
             if api_key:
-                os.environ["GOOGLE_API_KEY"] = api_key
+                os.environ["GROQ_API_KEY"] = api_key
         else:
             st.success("✅ API Key configured")
         
@@ -93,7 +93,7 @@ def main():
             │
             ▼
         ┌─────────────────┐
-        │  Parse Patient  │ ← Gemini LLM
+        │  Parse Patient  │ ← Llama 3 70B
         └────────┬────────┘
                  │
                  ▼
@@ -103,19 +103,19 @@ def main():
                  │
                  ▼
         ┌─────────────────┐
-        │ Analyze Match    │ ← Gemini LLM
+        │ Analyze Match    │ ← Llama 3 70B
         └────────┬────────┘
                  │
                  ▼
         ┌─────────────────┐
-        │ Generate Report  │ ← Gemini LLM
+        │ Generate Report  │ ← Llama 3 70B
         └─────────────────┘
         ```
         """)
         
         st.markdown("---")
         st.markdown("### 🛠️ Tech Stack")
-        techs = ["LangGraph", "LangChain", "Google Gemini 2.0", "ClinicalTrials.gov API", "Streamlit", "Python"]
+        techs = ["LangGraph", "LangChain", "Groq Llama 3 70B", "ClinicalTrials.gov API", "Streamlit", "Python"]
         for t in techs:
             st.markdown(f'<span class="tech-badge">{t}</span>', unsafe_allow_html=True)
         
@@ -164,8 +164,8 @@ def main():
         if not patient_input.strip():
             st.error("Please enter a patient profile.")
             return
-        if not os.environ.get("GOOGLE_API_KEY"):
-            st.error("Please configure your Google Gemini API key in the sidebar.")
+        if not os.environ.get("GROQ_API_KEY"):
+            st.error("Please configure your Groq API key in the sidebar.")
             return
 
         from agent.graph import run_agent
@@ -261,7 +261,7 @@ def main():
     st.markdown("""
     <div style="text-align: center; color: #6c757d; font-size: 0.85em;">
         <p>⚠️ <strong>Disclaimer:</strong> This tool is for informational purposes only. Always consult with healthcare professionals for clinical trial eligibility decisions.</p>
-        <p>Built with LangGraph • LangChain • Google Gemini • ClinicalTrials.gov API</p>
+        <p>Built with LangGraph • LangChain • Groq Llama 3 • ClinicalTrials.gov API</p>
     </div>
     """, unsafe_allow_html=True)
 

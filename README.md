@@ -8,7 +8,7 @@ An AI-powered clinical trial matching system that uses **LangGraph** agents to s
 
 Input a patient profile in natural language, and the AI agent pipeline will:
 
-1. **Parse** the patient profile into structured clinical data using Google Gemini
+1. **Parse** the patient profile into structured clinical data using Groq Llama 3 70B
 2. **Search** ClinicalTrials.gov for actively recruiting trials matching the patient's conditions
 3. **Analyze** eligibility criteria for each trial against the patient's profile
 4. **Rank** trials by match score with detailed reasoning
@@ -21,7 +21,7 @@ Patient Input (Free Text)
         │
         ▼
 ┌──────────────────┐
-│  Parse Patient   │ ← Google Gemini 2.0 Flash
+│  Parse Patient   │ ← Groq Llama 3 70B
 │  (LangGraph Node)│   Extracts: age, sex, conditions,
 └────────┬─────────┘   medications, lab values
          │
@@ -33,13 +33,13 @@ Patient Input (Free Text)
          │
          ▼
 ┌──────────────────┐
-│ Analyze Match    │ ← Google Gemini 2.0 Flash
+│ Analyze Match    │ ← Groq Llama 3 70B
 │ (LangGraph Node) │   Scores 0-100 per trial
 └────────┬─────────┘
          │
          ▼
 ┌──────────────────┐
-│ Generate Report  │ ← Google Gemini 2.0 Flash
+│ Generate Report  │ ← Groq Llama 3 70B
 │ (LangGraph Node) │   Professional summary
 └──────────────────┘
 ```
@@ -50,7 +50,7 @@ Patient Input (Free Text)
 |---|---|
 | **Agent Framework** | LangGraph (stateful multi-step agent) |
 | **LLM Orchestration** | LangChain |
-| **LLM** | Google Gemini 2.0 Flash |
+| **LLM** | Groq Llama 3 70B |
 | **Data Source** | ClinicalTrials.gov API v2 (real-time, 400K+ trials) |
 | **Frontend** | Streamlit |
 | **Deployment** | Streamlit Cloud |
@@ -65,9 +65,9 @@ pip install -r requirements.txt
 
 ## 🔧 Configuration
 
-Set your Google Gemini API key:
+Set your Groq API key:
 ```bash
-export GOOGLE_API_KEY="your_key_here"
+export GROQ_API_KEY="your_key_here"
 ```
 
 Or enter it in the app sidebar.
