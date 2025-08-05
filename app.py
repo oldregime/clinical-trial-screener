@@ -52,6 +52,7 @@ def main():
             "Custom Input...": "",
             "Oncology: Breast Cancer": "45-year-old female diagnosed with HER2-positive breast cancer, stage II. Completed 4 cycles of AC-T chemotherapy. Currently on Trastuzumab maintenance therapy. ECOG performance status 1. No significant cardiac history. Previous surgical history includes lumpectomy with clear margins.",
             "Endocrinology: Type 2 Diabetes": "58-year-old male with Type 2 Diabetes Mellitus diagnosed 5 years ago. Currently on Metformin 1000mg twice daily and Sitagliptin 100mg daily. Recent HbA1c of 7.8%. BMI 32. History of hypertension controlled with Lisinopril 10mg. No history of cardiovascular events. Non-smoker.",
+            "Cardiology: Heart Failure": "68-year-old male with NYHA Class II Heart Failure with reduced Ejection Fraction (HFrEF). Recent echo shows LVEF of 35%. Currently prescribed Entresto 49/51mg twice daily, Carvedilol 12.5mg twice daily, and Spironolactone 25mg daily. History of myocardial infarction 3 years ago. Blood pressure stable at 118/75 mmHg. eGFR 55 mL/min.",
         }
         selected = st.selectbox("Load Example", options=list(examples.keys()), label_visibility="collapsed")
         patient_input = st.text_area("Clinical Notes", value=examples.get(selected, ""), height=300, placeholder="Paste raw clinical notes or patient history here...", label_visibility="collapsed")

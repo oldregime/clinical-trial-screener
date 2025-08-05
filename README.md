@@ -2,7 +2,13 @@
 
 An AI-powered clinical trial matching system that uses **LangGraph** agents to screen patients against real-time **ClinicalTrials.gov** data.
 
-[![Open in Streamlit](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://clinical-trial-screener.streamlit.app/)
+<div align="center">
+  <br>
+  <a href="https://clinical-trial-screener.streamlit.app/">
+    <img src="https://img.shields.io/badge/Try_the_Project-Live_Demo-0d9488?style=for-the-badge&logo=streamlit&logoColor=white" alt="Try Live Demo">
+  </a>
+  <br><br>
+</div>
 
 ## 🚀 What It Does
 
