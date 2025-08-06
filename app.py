@@ -29,20 +29,7 @@ st.markdown("""
 def main():
     st.markdown('<div class="header-container"><h1 class="header-title">Clinical Trial Screener</h1><div class="header-subtitle">Automated eligibility analysis against ClinicalTrials.gov</div></div>', unsafe_allow_html=True)
 
-    with st.sidebar:
-        st.markdown("### Configuration")
-        api_key = os.environ.get("GROQ_API_KEY", "")
-        if not api_key:
-            api_key = st.text_input("Groq API Key", type="password")
-            if api_key:
-                os.environ["GROQ_API_KEY"] = api_key
-        else:
-            st.caption("API Key configured.")
-            
-        st.markdown("---")
-        st.markdown("### Filters")
-        st.slider("Minimum Match Score", 0, 100, 40, step=10, key="min_score", help="Filter out trials with a low LLM eligibility score.")
-        st.caption("Powered by Llama 3.3 and LangGraph")
+    # Removed sidebar for cleaner UI
 
     col_input, col_results = st.columns([1, 1.3], gap="large")
 
@@ -53,6 +40,8 @@ def main():
             "Oncology: Breast Cancer": "45-year-old female diagnosed with HER2-positive breast cancer, stage II. Completed 4 cycles of AC-T chemotherapy. Currently on Trastuzumab maintenance therapy. ECOG performance status 1. No significant cardiac history. Previous surgical history includes lumpectomy with clear margins.",
             "Endocrinology: Type 2 Diabetes": "58-year-old male with Type 2 Diabetes Mellitus diagnosed 5 years ago. Currently on Metformin 1000mg twice daily and Sitagliptin 100mg daily. Recent HbA1c of 7.8%. BMI 32. History of hypertension controlled with Lisinopril 10mg. No history of cardiovascular events. Non-smoker.",
             "Cardiology: Heart Failure": "68-year-old male with NYHA Class II Heart Failure with reduced Ejection Fraction (HFrEF). Recent echo shows LVEF of 35%. Currently prescribed Entresto 49/51mg twice daily, Carvedilol 12.5mg twice daily, and Spironolactone 25mg daily. History of myocardial infarction 3 years ago. Blood pressure stable at 118/75 mmHg. eGFR 55 mL/min.",
+            "Oncology: Lung Cancer (NSCLC)": "62-year-old male with newly diagnosed Stage III Non-Small Cell Lung Cancer (NSCLC). EGFR mutation negative, ALK negative, PD-L1 TPS 60%. ECOG 0. History of COPD, well-controlled on fluticasone/salmeterol inhaler. Former smoker (quit 5 years ago). Normal kidney and liver function.",
+            "Autoimmune: Rheumatoid Arthritis": "41-year-old female with severe, active Rheumatoid Arthritis for 8 years. Failed methotrexate and Humira (adalimumab). Currently experiencing joint swelling in hands and knees. RF positive, anti-CCP positive. ESR 45 mm/hr, CRP 28 mg/L. Otherwise healthy."
         }
         selected = st.selectbox("Load Example", options=list(examples.keys()), label_visibility="collapsed")
         patient_input = st.text_area("Clinical Notes", value=examples.get(selected, ""), height=300, placeholder="Paste raw clinical notes or patient history here...", label_visibility="collapsed")
@@ -91,7 +80,7 @@ def main():
                 matches = result.get("trial_matches", [])
                 
                 # Apply UI Filters
-                min_score = st.session_state.min_score
+                min_score = 40  # Hardcoded filter to keep UI clean
                 filtered_matches = [m for m in matches if m.get("match_score", 0) >= min_score]
                 
                 # Top-level metrics
