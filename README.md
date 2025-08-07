@@ -4,7 +4,7 @@ An AI-powered clinical trial matching system that uses **LangGraph** agents to s
 
 <div align="center">
   <br>
-  <a href="https://clinical-trial-screener-divyansh.streamlit.app/">
+  <a href="https://clinical-trial-screener-divyansh.streamlit.app">
     <img src="https://img.shields.io/badge/Try_the_Project-Live_Demo-0d9488?style=for-the-badge&logo=streamlit&logoColor=white" alt="Try Live Demo">
   </a>
   <br><br>
