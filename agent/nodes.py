@@ -7,7 +7,7 @@ from utils.clinicaltrials import search_trials
 
 def get_llm():
     return ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         groq_api_key=os.environ.get("GROQ_API_KEY"),
         temperature=0.1,
     )
@@ -58,7 +58,7 @@ def analyze_eligibility(state: AgentState) -> AgentState:
         llm = get_llm()
         patient = state["parsed_patient"]
         matches = []
-        for trial in state["raw_trials"][:8]:  # Limit to 8 to stay within rate limits
+        for trial in state["raw_trials"][:5]:  # Limit to 5 to stay within rate limits
             prompt = ANALYZE_ELIGIBILITY_PROMPT.format(
                 age=patient.get("age", "Unknown"),
                 sex=patient.get("sex", "Unknown"),

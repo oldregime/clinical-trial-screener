@@ -34,7 +34,7 @@ Use clean markdown formatting with bullet points and bold text for readability. 
 
 def get_llm():
     return ChatGroq(
-        model="llama-3.3-70b-versatile",
+        model="llama-3.1-8b-instant",
         groq_api_key=os.environ.get("GROQ_API_KEY"),
         temperature=0.1,
     )

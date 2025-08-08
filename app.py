@@ -52,7 +52,7 @@ def app_trial_screener():
     st.markdown("""
     <div style="background-color: #f0fdfa; border-left: 4px solid #0d9488; padding: 1.25rem; margin-bottom: 2rem; border-radius: 4px;">
         <p style="margin: 0; font-size: 0.95rem; color: #111827; line-height: 1.5;">
-            <strong>Welcome to the AI Clinical Trial Screener.</strong> This tool uses <strong>Groq Llama 3.3</strong> and <strong>LangGraph</strong> to instantly read complex clinical notes, extract key medical conditions, and cross-reference them against thousands of actively recruiting studies on ClinicalTrials.gov. Paste a patient's medical history below to automatically discover and rank the best experimental treatment options in seconds.
+            <strong>Welcome to the AI Clinical Trial Screener.</strong> This tool uses <strong>Groq Llama 3.1</strong> and <strong>LangGraph</strong> to instantly read complex clinical notes, extract key medical conditions, and cross-reference them against thousands of actively recruiting studies on ClinicalTrials.gov. Paste a patient's medical history below to automatically discover and rank the best experimental treatment options in seconds.
         </p>
     </div>
     """, unsafe_allow_html=True)
