@@ -1,8 +1,9 @@
 import streamlit as st
 import os
 import time
+import pypdf
 
-st.set_page_config(page_title="Clinical Trial Screener", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Medical AI Suite", layout="wide", initial_sidebar_state="expanded")
 
 st.markdown("""
 <style>
@@ -22,13 +23,32 @@ st.markdown("""
     .apply-box { background-color: #f0fdfa; border: 1px solid #ccfbf1; padding: 1rem; border-radius: 6px; margin-top: 1rem; }
     .apply-box h5 { margin-top: 0; color: #0f766e; font-size: 0.9rem; margin-bottom: 0.5rem;}
     
+    /* Tables for Lab Report */
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th { text-align: left; padding: 0.75rem; background-color: #f9fafb; border-bottom: 2px solid #e5e7eb; font-size: 0.85rem; color: #6b7280; text-transform: uppercase; }
+    td { padding: 0.75rem; border-bottom: 1px solid #e5e7eb; font-size: 0.95rem; }
+    
+    .status-normal { color: #059669; font-weight: 600; }
+    .status-high { color: #dc2626; font-weight: 600; }
+    .status-low { color: #d97706; font-weight: 600; }
+    
     #MainMenu {visibility: hidden;} footer {visibility: hidden;} header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-def main():
-    st.markdown('<div class="header-container"><h1 class="header-title">Clinical Trial Screener</h1><div class="header-subtitle">Automated eligibility analysis against ClinicalTrials.gov</div></div>', unsafe_allow_html=True)
+def get_score_class(score):
+    if score >= 70: return "score-high"
+    if score >= 40: return "score-med"
+    return "score-low"
 
+def extract_pdf_text(uploaded_file):
+    reader = pypdf.PdfReader(uploaded_file)
+    text = ""
+    for page in reader.pages:
+        text += page.extract_text() + "\n"
+    return text
+
+def app_trial_screener():
     st.markdown("""
     <div style="background-color: #f0fdfa; border-left: 4px solid #0d9488; padding: 1.25rem; margin-bottom: 2rem; border-radius: 4px;">
         <p style="margin: 0; font-size: 0.95rem; color: #111827; line-height: 1.5;">
@@ -84,12 +104,9 @@ def main():
                     return
 
                 matches = result.get("trial_matches", [])
-                
-                # Apply UI Filters
-                min_score = 40  # Hardcoded filter to keep UI clean
+                min_score = 40
                 filtered_matches = [m for m in matches if m.get("match_score", 0) >= min_score]
                 
-                # Top-level metrics
                 m1, m2, m3 = st.columns(3)
                 m1.metric("Trials Evaluated", len(matches))
                 m2.metric("Filtered Results", len(filtered_matches))
@@ -97,8 +114,6 @@ def main():
                 m3.metric("Avg Match Score", f"{avg_score}%")
                 
                 st.markdown("---")
-
-                # UI Tabs for better organization
                 tab1, tab2, tab3 = st.tabs(["📋 Trial Matches", "🧬 Extracted Profile", "📄 Clinical Report"])
                 
                 with tab1:
@@ -112,21 +127,14 @@ def main():
                             score = match.get("match_score", 0)
                             title = match.get('title', 'Unknown Trial')
                             nct = match.get('nct_id', '')
-                            
-                            # Add status emoji based on score directly to title
                             status_icon = "🟢" if score >= 70 else "🟡"
-                            
-                            # Score is now visible directly in the drop down menu
                             expander_title = f"{status_icon} [Score: {score}%] {nct} — {title[:70]}..."
                             
                             with st.expander(expander_title, expanded=expand_first):
                                 st.markdown(f"<div class='data-label'>Phase / Status</div>", unsafe_allow_html=True)
                                 st.markdown(f"<div class='data-value'>{match.get('phase', '--')} • {match.get('status', '--')}</div>", unsafe_allow_html=True)
-                                
                                 st.markdown("<div class='data-label'>Eligibility Assessment</div>", unsafe_allow_html=True)
                                 st.markdown(f"<div class='data-value' style='color: #4b5563; font-size: 0.9rem;'>{match.get('match_reasoning', '--')}</div>", unsafe_allow_html=True)
-                                
-                                # New How to Apply section
                                 st.markdown(f"""
                                 <div class='apply-box'>
                                     <h5>📝 How to Apply / Enroll</h5>
@@ -172,7 +180,105 @@ def main():
                     import traceback
                     st.code(traceback.format_exc())
 
-    # Personal signature footer
+
+def app_report_analyzer():
+    st.markdown("""
+    <div style="background-color: #fdf4ff; border-left: 4px solid #c026d3; padding: 1.25rem; margin-bottom: 2rem; border-radius: 4px;">
+        <p style="margin: 0; font-size: 0.95rem; color: #111827; line-height: 1.5;">
+            <strong>Welcome to the Medical Report Analyzer.</strong> Upload your 6-month checkup or lab results PDF. This tool uses AI to extract complex biomarkers, identify abnormalities, and generate a simple, plain-English explanation of your health metrics so you can understand your body better.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    col_upload, col_analysis = st.columns([1, 1.5], gap="large")
+    
+    with col_upload:
+        st.markdown("### Upload Report")
+        uploaded_file = st.file_uploader("Upload your Lab Report (PDF)", type=["pdf"])
+        
+        if uploaded_file is not None:
+            st.success(f"File '{uploaded_file.name}' uploaded successfully.")
+            analyze_button = st.button("Analyze Lab Results", type="primary", use_container_width=True)
+        else:
+            analyze_button = False
+            
+    if analyze_button:
+        if not os.environ.get("GROQ_API_KEY"):
+            st.error("API Key missing. Please configure it in the sidebar.")
+            return
+            
+        with col_analysis:
+            st.markdown("### Health Analysis")
+            
+            with st.spinner("Extracting text from PDF..."):
+                try:
+                    pdf_text = extract_pdf_text(uploaded_file)
+                except Exception as e:
+                    st.error(f"Failed to read PDF: {str(e)}")
+                    return
+            
+            if len(pdf_text.strip()) < 10:
+                st.error("Could not extract any text from this PDF. It may be a scanned image without OCR.")
+                return
+                
+            with st.spinner("AI is analyzing your biomarkers..."):
+                from agent.report_analyzer import analyze_lab_report
+                try:
+                    results = analyze_lab_report(pdf_text)
+                except Exception as e:
+                    st.error(f"Analysis failed: {str(e)}")
+                    return
+                    
+            biomarkers = results.get("biomarkers", [])
+            explanation = results.get("explanation", "")
+            
+            if not biomarkers:
+                st.warning("No structured lab results found in the document.")
+            else:
+                tab_summary, tab_data = st.tabs(["💬 Plain English Summary", "📊 Extracted Data"])
+                
+                with tab_summary:
+                    st.markdown(f"<div style='font-size: 0.95rem; line-height: 1.6;'>{explanation}</div>", unsafe_allow_html=True)
+                    
+                with tab_data:
+                    # Build HTML table
+                    html = "<table><tr><th>Test Name</th><th>Result</th><th>Units</th><th>Range</th><th>Status</th></tr>"
+                    for b in biomarkers:
+                        status = b.get('status', 'Normal')
+                        status_class = f"status-{status.lower()}" if status in ['High', 'Low'] else "status-normal"
+                        
+                        html += f"<tr>"
+                        html += f"<td>{b.get('test_name', '--')}</td>"
+                        html += f"<td><strong>{b.get('result_value', '--')}</strong></td>"
+                        html += f"<td>{b.get('unit', '--')}</td>"
+                        html += f"<td>{b.get('reference_range', '--')}</td>"
+                        html += f"<td class='{status_class}'>{status}</td>"
+                        html += f"</tr>"
+                    html += "</table>"
+                    st.markdown(html, unsafe_allow_html=True)
+
+
+def main():
+    st.markdown('<div class="header-container"><h1 class="header-title">Medical AI Suite</h1><div class="header-subtitle">Advanced AI tools for patients and researchers</div></div>', unsafe_allow_html=True)
+
+    with st.sidebar:
+        st.markdown("### Navigation")
+        app_mode = st.radio("Select Tool", ["🧬 Clinical Trial Screener", "📄 Lab Report Analyzer"])
+        
+        st.markdown("---")
+        api_key = os.environ.get("GROQ_API_KEY", "")
+        if not api_key:
+            api_key = st.text_input("Groq API Key", type="password")
+            if api_key:
+                os.environ["GROQ_API_KEY"] = api_key
+        else:
+            st.caption("✅ API Key securely configured.")
+
+    if app_mode == "🧬 Clinical Trial Screener":
+        app_trial_screener()
+    else:
+        app_report_analyzer()
+
     st.markdown('<div class="footer-text">Divyansh Joshi made with my hands not love</div>', unsafe_allow_html=True)
 
 if __name__ == "__main__":
