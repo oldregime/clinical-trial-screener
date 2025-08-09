@@ -264,6 +264,14 @@ def app_report_analyzer():
 def main():
     st.markdown('<div class="header-container"><h1 class="header-title">Medical AI Suite</h1><div class="header-subtitle">Advanced AI tools for patients and researchers</div></div>', unsafe_allow_html=True)
 
+    st.markdown("""
+    <div style="background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; margin-bottom: 2rem; border-radius: 4px;">
+        <p style="margin: 0; font-size: 0.9rem; color: #92400e;">
+            <strong>⏳ Heads up:</strong> The AI inference engine can sometimes be slow when evaluating complex medical data. Please be patient while the results are generated.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
     with st.sidebar:
         st.markdown("### Navigation")
         app_mode = st.radio("Select Tool", ["🧬 Clinical Trial Screener", "📄 Lab Report Analyzer"])
