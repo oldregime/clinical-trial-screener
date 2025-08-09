@@ -46,15 +46,16 @@ def analyze_lab_report(text: str) -> dict:
     extract_msg = llm.invoke(EXTRACT_PROMPT.format(text=text))
     raw_json = extract_msg.content.strip()
     
-    # Clean markdown fences if the LLM adds them despite instructions
-    if raw_json.startswith("```"):
-        raw_json = raw_json.split("\n", 1)[1]
-        raw_json = raw_json.rsplit("```", 1)[0]
-    if raw_json.startswith("json"):
-        raw_json = raw_json[4:].strip()
+    # Use regex to find the JSON array anywhere in the text
+    import re
+    match = re.search(r'\[.*\]', raw_json, re.DOTALL)
+    if match:
+        clean_json = match.group(0)
+    else:
+        clean_json = raw_json
         
     try:
-        biomarkers = json.loads(raw_json)
+        biomarkers = json.loads(clean_json)
     except json.JSONDecodeError as e:
         print(f"JSON Parse Error: {e} \nRaw output: {raw_json}")
         biomarkers = []
