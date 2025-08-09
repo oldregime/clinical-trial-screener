@@ -25,6 +25,7 @@ class TrialMatch(TypedDict, total=False):
 
 class AgentState(TypedDict, total=False):
     patient_input: str
+    country_filter: str
     parsed_patient: PatientData
     search_query: str
     raw_trials: list[dict]

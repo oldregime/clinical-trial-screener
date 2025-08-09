@@ -42,7 +42,8 @@ def search_clinical_trials(state: AgentState) -> AgentState:
         return state
     try:
         query = state.get("search_query", "")
-        trials = search_trials(query, max_results=10)
+        country = state.get("country_filter", "Global")
+        trials = search_trials(query, max_results=10, country=country)
         if not trials:
             return {**state, "raw_trials": [], "status": "No trials found for the given conditions"}
         return {**state, "raw_trials": trials, "status": f"Found {len(trials)} potentially relevant trials"}

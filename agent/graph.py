@@ -21,18 +21,19 @@ def build_graph():
 
     return workflow.compile()
 
-def run_agent(patient_input: str) -> AgentState:
+def run_agent(patient_input: str, country_filter: str = "Global") -> AgentState:
     """Run the clinical trial screening agent."""
     graph = build_graph()
     initial_state = AgentState(
         patient_input=patient_input,
+        country_filter=country_filter,
         parsed_patient={},
         search_query="",
         raw_trials=[],
         trial_matches=[],
         final_report="",
         error=None,
-        status="Starting analysis...",
+        status="Starting analysis..."
     )
-    result = graph.invoke(initial_state)
+    result = graph.invoke(initial_state, config={"recursion_limit": 10})
     return result

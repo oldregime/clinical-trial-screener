@@ -3,7 +3,7 @@ from typing import Optional
 
 BASE_URL = "https://clinicaltrials.gov/api/v2"
 
-def search_trials(query: str, max_results: int = 10, status: str = "RECRUITING") -> list[dict]:
+def search_trials(query: str, max_results: int = 10, status: str = "RECRUITING", country: str = "Global") -> list[dict]:
     """Search ClinicalTrials.gov API v2 for clinical trials."""
     try:
         params = {
@@ -13,6 +13,9 @@ def search_trials(query: str, max_results: int = 10, status: str = "RECRUITING")
             "fields": "NCTId,BriefTitle,OverallStatus,Phase,Condition,EligibilityCriteria,LocationCity,LocationState,LocationCountry",
             "sort": "@relevance",
         }
+        if country and country != "Global":
+            params["query.locn"] = country
+            
         response = requests.get(f"{BASE_URL}/studies", params=params, timeout=15)
         response.raise_for_status()
         data = response.json()

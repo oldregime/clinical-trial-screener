@@ -71,6 +71,9 @@ def app_trial_screener():
         }
         selected = st.selectbox("Load Example", options=list(examples.keys()), label_visibility="collapsed")
         patient_input = st.text_area("Clinical Notes", value=examples.get(selected, ""), height=300, placeholder="Paste raw clinical notes or patient history here...", label_visibility="collapsed")
+        
+        country_filter = st.selectbox("Preferred Trial Location", ["Global", "India", "United States", "United Kingdom", "Canada", "Australia", "Europe"])
+        
         run_button = st.button("Run Eligibility Screen", type="primary", use_container_width=True)
 
     if run_button:
@@ -96,7 +99,7 @@ def app_trial_screener():
                 progress.progress(75, text="Running LLM eligibility evaluation...")
 
             try:
-                result = run_agent(patient_input)
+                result = run_agent(patient_input, country_filter)
                 status_placeholder.empty()
 
                 if result.get("error"):
