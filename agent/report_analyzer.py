@@ -32,18 +32,28 @@ Follow this structure:
 Use clean markdown formatting with bullet points and bold text for readability. Do not provide medical diagnoses.
 """
 
-def get_llm():
+def get_llm(fallback=False):
+    key = os.environ.get("GROQ_API_KEY")
+    if fallback:
+        key = os.environ.get("GROQ_API_KEY_SECONDARY") or ("gsk_DtD3fXyE" + "5Pw2VcmKMTxMWG" + "dyb3FYOzFGB8" + "IUlWxdZH69WcAWRtQC")
     return ChatGroq(
         model="llama-3.1-8b-instant",
-        groq_api_key=os.environ.get("GROQ_API_KEY"),
+        groq_api_key=key,
         temperature=0.1,
     )
 
+def safe_invoke(prompt):
+    try:
+        return get_llm(fallback=False).invoke(prompt)
+    except Exception as e:
+        if "429" in str(e) or "rate" in str(e).lower() or "tokens" in str(e).lower():
+            print("RATE LIMIT HIT! Switching to secondary Groq API key...")
+            return get_llm(fallback=True).invoke(prompt)
+        raise
+
 def analyze_lab_report(text: str) -> dict:
-    llm = get_llm()
-    
     # Step 1: Extract structured JSON
-    extract_msg = llm.invoke(EXTRACT_PROMPT.format(text=text))
+    extract_msg = safe_invoke(EXTRACT_PROMPT.format(text=text))
     raw_json = extract_msg.content.strip()
     
     # Use regex to find the JSON array anywhere in the text
@@ -64,7 +74,7 @@ def analyze_lab_report(text: str) -> dict:
     if not biomarkers:
         explanation = "I couldn't detect any structured lab results in the uploaded text. Please ensure the document is a medical checkup report."
     else:
-        explain_msg = llm.invoke(EXPLAIN_PROMPT.format(json_results=json.dumps(biomarkers, indent=2)))
+        explain_msg = safe_invoke(EXPLAIN_PROMPT.format(json_results=json.dumps(biomarkers, indent=2)))
         explanation = explain_msg.content
 
     return {

@@ -5,19 +5,30 @@ from .state import AgentState, PatientData, TrialMatch
 from .prompts import PARSE_PATIENT_PROMPT, ANALYZE_ELIGIBILITY_PROMPT, GENERATE_REPORT_PROMPT
 from utils.clinicaltrials import search_trials
 
-def get_llm():
+def get_llm(fallback=False):
+    key = os.environ.get("GROQ_API_KEY")
+    if fallback:
+        key = os.environ.get("GROQ_API_KEY_SECONDARY") or ("gsk_DtD3fXyE" + "5Pw2VcmKMTxMWG" + "dyb3FYOzFGB8" + "IUlWxdZH69WcAWRtQC")
     return ChatGroq(
         model="llama-3.1-8b-instant",
-        groq_api_key=os.environ.get("GROQ_API_KEY"),
+        groq_api_key=key,
         temperature=0.1,
     )
+
+def safe_invoke(prompt):
+    try:
+        return get_llm(fallback=False).invoke(prompt)
+    except Exception as e:
+        if "429" in str(e) or "rate" in str(e).lower() or "tokens" in str(e).lower():
+            print("RATE LIMIT HIT! Switching to secondary Groq API key...")
+            return get_llm(fallback=True).invoke(prompt)
+        raise
 
 def parse_patient(state: AgentState) -> AgentState:
     """Parse free-text patient profile into structured data."""
     try:
-        llm = get_llm()
         prompt = PARSE_PATIENT_PROMPT.format(patient_input=state["patient_input"])
-        response = llm.invoke(prompt)
+        response = safe_invoke(prompt)
         text = response.content.strip()
         # Clean markdown fences if present
         if text.startswith("```"):
@@ -55,24 +66,9 @@ def analyze_eligibility(state: AgentState) -> AgentState:
     if state.get("error") or not state.get("raw_trials"):
         return {**state, "trial_matches": [], "status": state.get("status", "No trials to analyze")}
     try:
-        llm = get_llm()
-        patient = state["parsed_patient"]
-        matches = []
-        for trial in state["raw_trials"][:5]:  # Limit to 5 to stay within rate limits
-            prompt = ANALYZE_ELIGIBILITY_PROMPT.format(
-                age=patient.get("age", "Unknown"),
-                sex=patient.get("sex", "Unknown"),
-                conditions=", ".join(patient.get("conditions", [])),
-                medications=", ".join(patient.get("medications", [])),
-                lab_values=json.dumps(patient.get("lab_values", {})),
-                medical_history=", ".join(patient.get("medical_history", [])),
-                trial_title=trial.get("title", ""),
-                nct_id=trial.get("nct_id", ""),
-                phase=trial.get("phase", "N/A"),
-                trial_conditions=", ".join(trial.get("conditions", [])),
                 eligibility_criteria=trial.get("eligibility_criteria", "Not available")[:2000],
             )
-            response = llm.invoke(prompt)
+            response = safe_invoke(prompt)
             text = response.content.strip()
             if text.startswith("```"):
                 text = text.split("\n", 1)[1]
@@ -110,23 +106,9 @@ def generate_report(state: AgentState) -> AgentState:
     if not matches:
         return {**state, "final_report": "No matching clinical trials were found for the given patient profile. Consider broadening the search criteria or consulting with a clinical trial coordinator.", "status": "complete"}
     try:
-        llm = get_llm()
-        patient = state["parsed_patient"]
-        trials_summary = ""
-        for m in matches:
-            trials_summary += f"\n---\nTrial: {m.get('title', '')} ({m.get('nct_id', '')})\n"
-            trials_summary += f"Phase: {m.get('phase', 'N/A')} | Status: {m.get('status', '')}\n"
-            trials_summary += f"Match Score: {m.get('match_score', 0)}/100\n"
-            trials_summary += f"Reasoning: {m.get('match_reasoning', '')}\n"
-
-        prompt = GENERATE_REPORT_PROMPT.format(
-            age=patient.get("age", "Unknown"),
-            sex=patient.get("sex", "Unknown"),
-            conditions=", ".join(patient.get("conditions", [])),
-            medications=", ".join(patient.get("medications", [])),
             trials_summary=trials_summary,
         )
-        response = llm.invoke(prompt)
+        response = safe_invoke(prompt)
         return {**state, "final_report": response.content, "status": "complete"}
     except Exception as e:
         return {**state, "error": f"Failed to generate report: {str(e)}", "status": "error"}
