@@ -66,6 +66,20 @@ def analyze_eligibility(state: AgentState) -> AgentState:
     if state.get("error") or not state.get("raw_trials"):
         return {**state, "trial_matches": [], "status": state.get("status", "No trials to analyze")}
     try:
+        patient = state["parsed_patient"]
+        matches = []
+        for trial in state["raw_trials"][:5]:  # Limit to 5 to stay within rate limits
+            prompt = ANALYZE_ELIGIBILITY_PROMPT.format(
+                age=patient.get("age", "Unknown"),
+                sex=patient.get("sex", "Unknown"),
+                conditions=", ".join(patient.get("conditions", [])),
+                medications=", ".join(patient.get("medications", [])),
+                lab_values=json.dumps(patient.get("lab_values", {})),
+                medical_history=", ".join(patient.get("medical_history", [])),
+                trial_title=trial.get("title", ""),
+                nct_id=trial.get("nct_id", ""),
+                phase=trial.get("phase", "N/A"),
+                trial_conditions=", ".join(trial.get("conditions", [])),
                 eligibility_criteria=trial.get("eligibility_criteria", "Not available")[:2000],
             )
             response = safe_invoke(prompt)
@@ -106,6 +120,19 @@ def generate_report(state: AgentState) -> AgentState:
     if not matches:
         return {**state, "final_report": "No matching clinical trials were found for the given patient profile. Consider broadening the search criteria or consulting with a clinical trial coordinator.", "status": "complete"}
     try:
+        patient = state["parsed_patient"]
+        trials_summary = ""
+        for m in matches:
+            trials_summary += f"\n---\nTrial: {m.get('title', '')} ({m.get('nct_id', '')})\n"
+            trials_summary += f"Phase: {m.get('phase', 'N/A')} | Status: {m.get('status', '')}\n"
+            trials_summary += f"Match Score: {m.get('match_score', 0)}/100\n"
+            trials_summary += f"Reasoning: {m.get('match_reasoning', '')}\n"
+
+        prompt = GENERATE_REPORT_PROMPT.format(
+            age=patient.get("age", "Unknown"),
+            sex=patient.get("sex", "Unknown"),
+            conditions=", ".join(patient.get("conditions", [])),
+            medications=", ".join(patient.get("medications", [])),
             trials_summary=trials_summary,
         )
         response = safe_invoke(prompt)
