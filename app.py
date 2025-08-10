@@ -292,13 +292,18 @@ def main():
         app_mode = st.radio("Select Tool", ["🧬 Clinical Trial Screener", "📄 Lab Report Analyzer"])
         
         st.markdown("---")
-        api_key = os.environ.get("GROQ_API_KEY", "")
-        if not api_key:
-            api_key = st.text_input("Groq API Key", type="password")
-            if api_key:
-                os.environ["GROQ_API_KEY"] = api_key
+        st.markdown("### ⚙️ Settings (BYOK)")
+        st.caption("Bring Your Own Key! If our free quota is exhausted, you can plug in your own Groq API key below.")
+        
+        user_key = st.text_input("Your Groq API Key (Optional)", type="password", placeholder="gsk_...")
+        
+        if user_key:
+            os.environ["GROQ_API_KEY"] = user_key
+            st.success("Custom API Key applied!")
+        elif os.environ.get("GROQ_API_KEY"):
+            st.caption("✅ Default System API Key is active.")
         else:
-            st.caption("✅ API Key securely configured.")
+            st.warning("⚠️ No API Key found. Please enter yours to use the app.")
 
     if app_mode == "🧬 Clinical Trial Screener":
         app_trial_screener()
