@@ -1,6 +1,6 @@
-# 🏥 Clinical Trial Eligibility Screener
+# 🏥 Medical AI Suite: Clinical Trial Screener & Lab Report Analyzer
 
-An AI-powered clinical trial matching system that uses **LangGraph** agents to screen patients against real-time **ClinicalTrials.gov** data.
+An AI-powered healthcare platform that uses **LangGraph** agents, **PyPDF**, and **Groq (Llama 3.1)** to bridge the gap between complex medical data and actionable patient insights. 
 
 <div align="center">
   <br>
@@ -10,56 +10,51 @@ An AI-powered clinical trial matching system that uses **LangGraph** agents to s
   <br><br>
 </div>
 
-## 🚀 What It Does
+This platform contains **two highly advanced, distinct applications** packaged into a single seamless dashboard:
 
-Input a patient profile in natural language, and the AI agent pipeline will:
+### 1. 🧬 Clinical Trial Screener
+Instantly cross-references unstructured patient medical profiles against the **ClinicalTrials.gov API** (400,000+ active studies).
+* **Information Extraction:** Parses free-text patient profiles (conditions, age, medications) into structured JSON.
+* **Geographic Filtering:** Seamlessly filters recruiting trials globally or in specific countries (US, UK, India, Canada, etc.).
+* **Automated Evaluation:** Analyzes thousands of words of dense trial eligibility criteria to calculate a precise "Match Score" (0-100%).
+* **Actionable Reports:** Generates professional referral letters to help patients enroll.
 
-1. **Parse** the patient profile into structured clinical data using Groq Llama 3 70B
-2. **Search** ClinicalTrials.gov for actively recruiting trials matching the patient's conditions
-3. **Analyze** eligibility criteria for each trial against the patient's profile
-4. **Rank** trials by match score with detailed reasoning
-5. **Generate** a professional clinical trial matching report
+### 2. 📄 Lab Report Analyzer
+A highly empathetic AI tool that translates confusing PDF lab results into plain English.
+* **PDF OCR Pipeline:** Uses `pypdf` and NLP to scrape unstructured text directly from medical checkups.
+* **Biomarker Structuring:** Identifies distinct biomarkers (e.g., LDL, Vitamin D, AST/ALT) and evaluates them against reference ranges to flag them as Normal, High, or Low.
+* **Patient-Centric Explanations:** Explains what each abnormal value means for the human body and offers simple lifestyle tips.
 
-## 🏗️ Architecture
+---
 
-```
-Patient Input (Free Text)
-        │
-        ▼
-┌──────────────────┐
-│  Parse Patient   │ ← Groq Llama 3 70B
-│  (LangGraph Node)│   Extracts: age, sex, conditions,
-└────────┬─────────┘   medications, lab values
-         │
-         ▼
-┌──────────────────┐
-│  Search Trials   │ ← ClinicalTrials.gov API v2
-│  (LangGraph Node)│   Finds recruiting trials
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Analyze Match    │ ← Groq Llama 3 70B
-│ (LangGraph Node) │   Scores 0-100 per trial
-└────────┬─────────┘
-         │
-         ▼
-┌──────────────────┐
-│ Generate Report  │ ← Groq Llama 3 70B
-│ (LangGraph Node) │   Professional summary
-└──────────────────┘
+## 🏗️ Technical Architecture
+
+```text
+               [ STREAMLIT FRONTEND ]
+                         │
+        ┌────────────────┴────────────────┐
+        ▼                                 ▼
+[ 1. Trial Screener ]              [ 2. Lab Analyzer ]
+        │                                 │
+  LangGraph Agent                   PyPDF Extraction
+        │                                 │
+  ClinicalTrials.gov API            JSON Biomarker Map
+        │                                 │
+  Groq (Llama 3.1 8B)               Groq (Llama 3.1 8B)
+        │                                 │
+   Match Scoring &                  Plain English
+   Evaluation logic                 Explanation logic
 ```
 
 ## 🛠️ Tech Stack
 
 | Component | Technology |
 |---|---|
-| **Agent Framework** | LangGraph (stateful multi-step agent) |
-| **LLM Orchestration** | LangChain |
-| **LLM** | Groq Llama 3 70B |
-| **Data Source** | ClinicalTrials.gov API v2 (real-time, 400K+ trials) |
-| **Frontend** | Streamlit |
-| **Deployment** | Streamlit Cloud |
+| **Agent Framework** | LangGraph, LangChain |
+| **Large Language Model** | Groq API (Llama 3.1 8B Instant) |
+| **Data Orchestration** | ClinicalTrials.gov API v2, PyPDF |
+| **Frontend UI** | Streamlit, Custom HTML/CSS |
+| **Deployment** | Streamlit Cloud, GitHub Actions |
 
 ## 📦 Installation
 
@@ -71,12 +66,13 @@ pip install -r requirements.txt
 
 ## 🔧 Configuration
 
-Set your Groq API key:
+Set your Groq API key (You can also set a secondary key to enable automatic failover if the primary key hits a rate limit):
 ```bash
-export GROQ_API_KEY="your_key_here"
+export GROQ_API_KEY="your_primary_key_here"
+export GROQ_API_KEY_SECONDARY="your_backup_key_here"
 ```
 
-Or enter it in the app sidebar.
+*Note: You can also just enter your API key directly into the app's sidebar when it launches.*
 
 ## 🚀 Run Locally
 
@@ -84,17 +80,9 @@ Or enter it in the app sidebar.
 streamlit run app.py
 ```
 
-## 📝 Example Patient Profiles
-
-**Type 2 Diabetes:**
-> 58-year-old male with Type 2 Diabetes Mellitus, on Metformin 1000mg, HbA1c 7.8%, BMI 32, controlled hypertension.
-
-**Breast Cancer:**
-> 45-year-old female with HER2-positive breast cancer stage II, completed AC-T chemo, on Trastuzumab maintenance.
-
 ## ⚠️ Disclaimer
 
-This tool is for **informational and educational purposes only**. It is not a substitute for professional medical advice. Always consult with healthcare professionals for clinical trial eligibility decisions.
+This tool is for **informational and educational purposes only**. It is not a substitute for professional medical advice. Always consult with healthcare professionals for clinical trial enrollment or health diagnosis decisions.
 
 ## 📄 License
 
